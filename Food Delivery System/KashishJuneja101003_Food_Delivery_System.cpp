@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <regex> // For email validation
 using namespace std;
 
 class Restaurant {
@@ -11,11 +12,15 @@ public:
     unordered_map<string, double> menu;
 
     // Default Constructor
-    Restaurant() : name(""), cuisine(""){}
+    Restaurant() : name(""), cuisine("") {}
 
     Restaurant(string name, string cuisine) : name(name), cuisine(cuisine) {}
 
     void addItem(string item, double price) {
+        if (item.empty() || price <= 0) {
+            cout << "Invalid menu item or price." << endl;
+            return;
+        }
         menu[item] = price;
     }
 
@@ -31,43 +36,60 @@ public:
     }
 };
 
-class User{
+class User {
     string name, username, password, email, phone, address;
 
 public:
     // Parameterized Constructor
-    User(string name, string username, string password, string email, string phone, string address) : name(name), username(username), password(password), email(email), phone(phone), address(address) {}
+    User(string name, string username, string password, string email, string phone, string address)
+        : name(name), username(username), password(password), email(email), phone(phone), address(address) {}
 
     // Default Constructor
-    User(){
-        name = username = password = email = phone = address = '0';
+    User() {
+        name = username = password = email = phone = address = "";
     }
 
     // Getters
-    void getName() const {cout << "\nName:" << name;}
-    string getUserName() const {return username;}
-    void getemail() const {cout << "\nEmail:" << email;}
-    void getPhone() const {cout << "\nPhone:" << phone;}
-    void getAddress() const {cout << "\nAddress:" << address;}
-    void getPassword() const {cout << "\nPassword is a private attribute and can't be shown to you.";}
-
-    // Setters
-    void setName(const string& name){this->name = name;}
-    void setUserName(const string& username) {this->username = username;}
-    void setEmail(const string& email){this->email = email;}
-    void setPhone(const string& phone){this->phone = phone;}
-    void setAddress(const string& address){this->address = address;}
-    void setPassword(const string& inputPassword){this->password = inputPassword;}
+    string getUserName() const { return username; }
+    string getEmail() const { return email; }
+    string getPassword() const { return password; }
 
     // Password Handling
-    bool validatePassword(const string& inputPassword){
-        return inputPassword == this->password;
+    bool validatePassword(const string& inputPassword) {
+        return inputPassword == password;
+    }
+
+    // Validation Functions
+    static bool isValidEmail(const string& email) {
+        const regex pattern(R"((\w+)(\.\w+)*@(\w+)(\.(\w+))+)");
+        return regex_match(email, pattern);
+    }
+
+    static bool isValidPhone(const string& phone) {
+        return phone.size() == 10 && all_of(phone.begin(), phone.end(), ::isdigit);
+    }
+
+    // User Input Validation
+    bool validateUser() {
+        if (name.empty() || username.empty() || password.empty() || address.empty()) {
+            cout << "All fields must be filled." << endl;
+            return false;
+        }
+        if (!isValidEmail(email)) {
+            cout << "Invalid email format." << endl;
+            return false;
+        }
+        if (!isValidPhone(phone)) {
+            cout << "Invalid phone number. It must contain 10 digits." << endl;
+            return false;
+        }
+        return true;
     }
 };
 
 class FoodDeliverySystem {
 private:
-    unordered_map<string, User> users;  // stores users by their username
+    unordered_map<string, User> users;  // Stores users by their username
     unordered_map<string, Restaurant> restaurants;
     struct Order {
         int id;
@@ -81,6 +103,9 @@ private:
 
 public:
     bool registerUser(User user) {
+        if (!user.validateUser()) {
+            return false;
+        }
         if (users.find(user.getUserName()) == users.end()) {
             users[user.getUserName()] = user;
             cout << "\nUser '" << user.getUserName() << "' registered successfully!" << endl;
@@ -97,21 +122,26 @@ public:
             cout << "Enter password: ";
             getline(cin, password);
 
-            if(users[username].validatePassword(password)){
+            if (users[username].validatePassword(password)) {
                 cout << "\nLogin successful!" << endl;
-            } else{
+                return true;
+            } else {
                 cout << "\nIncorrect Password" << endl;
+                return false;
             }
-
-            return true;
         } else {
+            cout << "\nUser not found." << endl;
             return false;
         }
     }
 
     void addRestaurant(string name, string cuisine) {
+        if (name.empty() || cuisine.empty()) {
+            cout << "Restaurant name and cuisine cannot be empty." << endl;
+            return;
+        }
         restaurants[name] = Restaurant(name, cuisine);
-        cout << "\n\nRestaurant '" << name << "' added successfully!" << endl;
+        cout << "\nRestaurant '" << name << "' added successfully!" << endl;
     }
 
     void addMenuItem(string restaurantName, string item, double price) {
@@ -134,14 +164,24 @@ public:
     void placeOrder(string restaurantName, vector<string> items) {
         if (restaurants.find(restaurantName) != restaurants.end()) {
             double totalPrice = 0;
+            bool invalidItem = false;
+
             for (const auto& item : items) {
                 if (restaurants[restaurantName].menu.find(item) != restaurants[restaurantName].menu.end()) {
                     totalPrice += restaurants[restaurantName].menu[item];
+                } else {
+                    cout << "Item '" << item << "' not found in the menu of " << restaurantName << endl;
+                    invalidItem = true;
                 }
             }
-            int orderId = orderIdCounter++;
-            orders[orderId] = {orderId, restaurantName, items, totalPrice, "Placed"};
-            cout << "Order placed successfully. Order ID: " << orderId << endl;
+
+            if (!invalidItem) {
+                int orderId = orderIdCounter++;
+                orders[orderId] = {orderId, restaurantName, items, totalPrice, "Placed"};
+                cout << "Order placed successfully. Order ID: " << orderId << endl;
+            } else {
+                cout << "\nOrder could not be placed due to invalid items." << endl;
+            }
         } else {
             cout << "Restaurant not found." << endl;
         }
@@ -158,45 +198,12 @@ public:
             }
         }
     }
-
-    void trackOrderStatus(int orderId) {
-        if (orders.find(orderId) != orders.end()) {
-            cout << "Order ID: " << orderId << " | Status: " << orders[orderId].status << endl;
-        } else {
-            cout << "Order not found." << endl;
-        }
-    }
-
-    void updateOrderStatus(int orderId, string newStatus) {
-        if (orders.find(orderId) != orders.end()) {
-            orders[orderId].status = newStatus;
-            cout << "Order ID " << orderId << " status updated to '" << newStatus << "'." << endl;
-        } else {
-            cout << "Order not found." << endl;
-        }
-    }
-
-    void cancelOrder(int orderId) {
-        if (orders.find(orderId) != orders.end()) {
-            orders.erase(orderId);
-            cout << "Order ID " << orderId << " has been cancelled." << endl;
-        } else {
-            cout << "Order not found." << endl;
-        }
-    }
 };
 
 int main() {
     FoodDeliverySystem system;
-    User u1;
 
-    u1.setName("Kashish");
-    u1.setEmail("example.com");
-    u1.setPassword("abcd");
-    u1.setPhone("1234567890");
-    u1.setUserName("k10");
-    u1.setAddress("Delhi");
-
+    User u1("Kashish", "k10", "abcd", "example@example.com", "1234567890", "Delhi");
     system.registerUser(u1);
 
     system.addRestaurant("Pizza Palace", "Italian");
@@ -207,10 +214,5 @@ int main() {
     system.placeOrder("Pizza Palace", items);
 
     system.viewOrderHistory();
-
-    system.trackOrderStatus(100);
-    system.updateOrderStatus(100, "Out for Delivery");
-    system.trackOrderStatus(100);
-
     return 0;
 }
