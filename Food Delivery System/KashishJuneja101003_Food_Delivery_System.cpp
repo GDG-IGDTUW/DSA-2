@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <regex> // For email validation
+#include <algorithm> // For transforming strings to lowercase
 using namespace std;
 
 class Restaurant {
@@ -37,7 +38,9 @@ public:
 };
 
 class User {
+private:
     string name, username, password, email, phone, address;
+    vector<int> orderHistory; // To store order IDs of past orders
 
 public:
     // Parameterized Constructor
@@ -84,6 +87,33 @@ public:
             return false;
         }
         return true;
+    }
+
+    // Order History Handling
+    void addToOrderHistory(int orderId) {
+        orderHistory.push_back(orderId);
+    }
+
+    void viewOrderHistory() const {
+        if (orderHistory.empty()) {
+            cout << "No orders placed yet." << endl;
+        } else {
+            cout << "Order History for " << name << ":" << endl;
+            for (int orderId : orderHistory) {
+                cout << "Order ID: " << orderId << endl;
+            }
+        }
+    }
+
+    // Update User Information
+    void updateAddress(const string& newAddress) {
+        address = newAddress;
+        cout << "Address updated successfully!" << endl;
+    }
+
+    void changePassword(const string& newPassword) {
+        password = newPassword;
+        cout << "Password updated successfully!" << endl;
     }
 };
 
@@ -161,7 +191,7 @@ public:
         }
     }
 
-    void placeOrder(string restaurantName, vector<string> items) {
+    void placeOrder(string username, string restaurantName, vector<string> items) {
         if (restaurants.find(restaurantName) != restaurants.end()) {
             double totalPrice = 0;
             bool invalidItem = false;
@@ -179,6 +209,9 @@ public:
                 int orderId = orderIdCounter++;
                 orders[orderId] = {orderId, restaurantName, items, totalPrice, "Placed"};
                 cout << "Order placed successfully. Order ID: " << orderId << endl;
+
+                // Add to user order history
+                users[username].addToOrderHistory(orderId);
             } else {
                 cout << "\nOrder could not be placed due to invalid items." << endl;
             }
@@ -187,16 +220,17 @@ public:
         }
     }
 
-    void viewOrderHistory() {
-        if (orders.empty()) {
-            cout << "No orders placed yet." << endl;
+    void viewOrderHistory(string username) {
+        if (users.find(username) != users.end()) {
+            users[username].viewOrderHistory();
         } else {
-            cout << "Order History:" << endl;
-            for (const auto& entry : orders) {
-                cout << "Order ID: " << entry.first << " | Restaurant: " << entry.second.restaurantName
-                     << " | Status: " << entry.second.status << " | Total: $" << entry.second.totalPrice << endl;
-            }
+            cout << "User not found." << endl;
         }
+    }
+
+    // Public method to get a reference to the User by username
+    User& getUserByUsername(string username) {
+        return users[username];
     }
 };
 
@@ -211,8 +245,14 @@ int main() {
     system.addMenuItem("Pizza Palace", "Garlic Bread", 5);
 
     vector<string> items = {"Margherita Pizza", "Garlic Bread"};
-    system.placeOrder("Pizza Palace", items);
+    system.placeOrder("k10", "Pizza Palace", items);
 
-    system.viewOrderHistory();
+    system.viewOrderHistory("k10");
+
+    // Accessing and updating user info
+    User& user = system.getUserByUsername("k10");
+    user.updateAddress("New Delhi, India");
+    user.changePassword("newPassword");
+
     return 0;
 }
