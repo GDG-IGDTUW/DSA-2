@@ -1,11 +1,9 @@
 import java.util.*;
-
 class SonamKumari29_warehouse {
     // Product class to represent a single product
     static class Product {
         String name;
         int quantity;
-
         Product(String name, int quantity) {
             this.name = name;
             this.quantity = quantity;
@@ -70,7 +68,6 @@ class SonamKumari29_warehouse {
                 System.out.println(warehouse.searchProduct(id));
             }
         }
-
         sc.close();
     }
 }
