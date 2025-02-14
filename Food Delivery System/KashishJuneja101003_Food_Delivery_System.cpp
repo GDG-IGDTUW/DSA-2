@@ -3,18 +3,19 @@
 #include <vector>
 #include <string>
 #include <regex> // For email validation
-#include <algorithm> // For transforming strings to lowercase
+#include <algorithm> // For case-insensitive matching
 using namespace std;
 
+const int INITIAL_ORDER_ID = 100; // Constant for starting order ID
+
 class Restaurant {
-public:
+private:
     string name;
     string cuisine;
     unordered_map<string, double> menu;
 
-    // Default Constructor
-    Restaurant() : name(""), cuisine("") {}
-
+public:
+    Restaurant() {}
     Restaurant(string name, string cuisine) : name(name), cuisine(cuisine) {}
 
     void addItem(string item, double price) {
@@ -22,6 +23,7 @@ public:
             cout << "Invalid menu item or price." << endl;
             return;
         }
+        transform(item.begin(), item.end(), item.begin(), ::tolower); // Normalize case
         menu[item] = price;
     }
 
@@ -35,34 +37,29 @@ public:
             }
         }
     }
+
+    double getItemPrice(const string& item) const {
+        string lowerItem = item;
+        transform(lowerItem.begin(), lowerItem.end(), lowerItem.begin(), ::tolower);
+        auto it = menu.find(lowerItem);
+        return (it != menu.end()) ? it->second : -1;
+    }
 };
 
 class User {
 private:
     string name, username, password, email, phone, address;
-    vector<int> orderHistory; // To store order IDs of past orders
+    vector<int> orderHistory;
 
 public:
-    // Parameterized Constructor
+    User() {}
     User(string name, string username, string password, string email, string phone, string address)
         : name(name), username(username), password(password), email(email), phone(phone), address(address) {}
 
-    // Default Constructor
-    User() {
-        name = username = password = email = phone = address = "";
-    }
-
-    // Getters
-    string getUserName() const { return username; }
-    string getEmail() const { return email; }
-    string getPassword() const { return password; }
-
-    // Password Handling
-    bool validatePassword(const string& inputPassword) {
+    bool validatePassword(const string& inputPassword) const {
         return inputPassword == password;
     }
 
-    // Validation Functions
     static bool isValidEmail(const string& email) {
         const regex pattern(R"((\w+)(\.\w+)*@(\w+)(\.(\w+))+)");
         return regex_match(email, pattern);
@@ -72,24 +69,6 @@ public:
         return phone.size() == 10 && all_of(phone.begin(), phone.end(), ::isdigit);
     }
 
-    // User Input Validation
-    bool validateUser() {
-        if (name.empty() || username.empty() || password.empty() || address.empty()) {
-            cout << "All fields must be filled." << endl;
-            return false;
-        }
-        if (!isValidEmail(email)) {
-            cout << "Invalid email format." << endl;
-            return false;
-        }
-        if (!isValidPhone(phone)) {
-            cout << "Invalid phone number. It must contain 10 digits." << endl;
-            return false;
-        }
-        return true;
-    }
-
-    // Order History Handling
     void addToOrderHistory(int orderId) {
         orderHistory.push_back(orderId);
     }
@@ -105,7 +84,6 @@ public:
         }
     }
 
-    // Update User Information
     void updateAddress(const string& newAddress) {
         address = newAddress;
         cout << "Address updated successfully!" << endl;
@@ -115,144 +93,98 @@ public:
         password = newPassword;
         cout << "Password updated successfully!" << endl;
     }
+
+    string getUsername() const { return username; }
 };
 
 class FoodDeliverySystem {
 private:
-    unordered_map<string, User> users;  // Stores users by their username
+    unordered_map<string, User> users;
     unordered_map<string, Restaurant> restaurants;
     struct Order {
         int id;
         string restaurantName;
         vector<string> items;
         double totalPrice;
-        string status; // Status of the order
+        string status;
     };
     unordered_map<int, Order> orders;
-    int orderIdCounter = 100;
+    int orderIdCounter = INITIAL_ORDER_ID;
 
 public:
-    bool registerUser(User user) {
-        if (!user.validateUser()) {
-            return false;
-        }
-        if (users.find(user.getUserName()) == users.end()) {
-            users[user.getUserName()] = user;
-            cout << "\nUser '" << user.getUserName() << "' registered successfully!" << endl;
+    bool registerUser(const User& user) {
+        if (users.find(user.getUsername()) == users.end()) {
+            users[user.getUsername()] = user;
+            cout << "User registered successfully!" << endl;
             return true;
-        } else {
-            cout << "\nUser already exists." << endl;
-            return false;
         }
+        cout << "User already exists." << endl;
+        return false;
     }
 
-    bool loginUser(string username) {
+    bool loginUser(const string& username) {
         if (users.find(username) != users.end()) {
             string password;
             cout << "Enter password: ";
-            getline(cin, password);
-
+            cin >> password;
             if (users[username].validatePassword(password)) {
-                cout << "\nLogin successful!" << endl;
+                cout << "Login successful!" << endl;
                 return true;
             } else {
-                cout << "\nIncorrect Password" << endl;
+                cout << "Incorrect password. Try again." << endl;
                 return false;
             }
-        } else {
-            cout << "\nUser not found." << endl;
-            return false;
         }
+        cout << "User not found." << endl;
+        return false;
     }
 
-    void addRestaurant(string name, string cuisine) {
-        if (name.empty() || cuisine.empty()) {
-            cout << "Restaurant name and cuisine cannot be empty." << endl;
-            return;
-        }
+    void addRestaurant(const string& name, const string& cuisine) {
         restaurants[name] = Restaurant(name, cuisine);
-        cout << "\nRestaurant '" << name << "' added successfully!" << endl;
+        cout << "Restaurant added successfully!" << endl;
     }
 
-    void addMenuItem(string restaurantName, string item, double price) {
+    void addMenuItem(const string& restaurantName, const string& item, double price) {
         if (restaurants.find(restaurantName) != restaurants.end()) {
             restaurants[restaurantName].addItem(item, price);
-            cout << "Item '" << item << "' added to the menu of " << restaurantName << endl;
-        } else {
-            cout << "\nRestaurant not found." << endl;
-        }
-    }
-
-    void viewRestaurantMenu(string restaurantName) {
-        if (restaurants.find(restaurantName) != restaurants.end()) {
-            restaurants[restaurantName].viewMenu();
-        } else {
-            cout << "\nRestaurant not found." << endl;
-        }
-    }
-
-    void placeOrder(string username, string restaurantName, vector<string> items) {
-        if (restaurants.find(restaurantName) != restaurants.end()) {
-            double totalPrice = 0;
-            bool invalidItem = false;
-
-            for (const auto& item : items) {
-                if (restaurants[restaurantName].menu.find(item) != restaurants[restaurantName].menu.end()) {
-                    totalPrice += restaurants[restaurantName].menu[item];
-                } else {
-                    cout << "Item '" << item << "' not found in the menu of " << restaurantName << endl;
-                    invalidItem = true;
-                }
-            }
-
-            if (!invalidItem) {
-                int orderId = orderIdCounter++;
-                orders[orderId] = {orderId, restaurantName, items, totalPrice, "Placed"};
-                cout << "Order placed successfully. Order ID: " << orderId << endl;
-
-                // Add to user order history
-                users[username].addToOrderHistory(orderId);
-            } else {
-                cout << "\nOrder could not be placed due to invalid items." << endl;
-            }
+            cout << "Item added to the menu!" << endl;
         } else {
             cout << "Restaurant not found." << endl;
         }
     }
 
-    void viewOrderHistory(string username) {
-        if (users.find(username) != users.end()) {
-            users[username].viewOrderHistory();
-        } else {
-            cout << "User not found." << endl;
+    void placeOrder(const string& username, const string& restaurantName, const vector<string>& items) {
+        if (restaurants.find(restaurantName) == restaurants.end()) {
+            cout << "Restaurant not found." << endl;
+            return;
         }
-    }
 
-    // Public method to get a reference to the User by username
-    User& getUserByUsername(string username) {
-        return users[username];
+        double totalPrice = 0;
+        for (const auto& item : items) {
+            double price = restaurants[restaurantName].getItemPrice(item);
+            if (price == -1) {
+                cout << "Item '" << item << "' not found in the menu." << endl;
+                return;
+            }
+            totalPrice += price;
+        }
+
+        int orderId = orderIdCounter++;
+        orders[orderId] = {orderId, restaurantName, items, totalPrice, "Placed"};
+        users[username].addToOrderHistory(orderId);
+        cout << "Order placed successfully. Order ID: " << orderId << endl;
     }
 };
 
 int main() {
     FoodDeliverySystem system;
-
-    User u1("Kashish", "k10", "abcd", "example@example.com", "1234567890", "Delhi");
-    system.registerUser(u1);
-
+    system.registerUser(User("Kashish", "k10", "abcd", "example@example.com", "1234567890", "Delhi"));
     system.addRestaurant("Pizza Palace", "Italian");
     system.addMenuItem("Pizza Palace", "Margherita Pizza", 10);
     system.addMenuItem("Pizza Palace", "Garlic Bread", 5);
+    system.placeOrder("k10", "Pizza Palace", {"Margherita Pizza", "Garlic Bread"});
 
-    vector<string> items = {"Margherita Pizza", "Garlic Bread"};
-    system.placeOrder("k10", "Pizza Palace", items);
-
-    system.viewOrderHistory("k10");
-
-    // Accessing and updating user info
-    User& user = system.getUserByUsername("k10");
-    user.updateAddress("New Delhi, India");
-    user.changePassword("newPassword");
+    system.registerUser(User("Kashish", "k10", "abcd", "example@example.com", "1234567890", "Delhi"));
 
     return 0;
 }
