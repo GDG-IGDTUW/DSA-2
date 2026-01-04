@@ -1,8 +1,8 @@
-File Compression (Huffman Coding)
+**File Compression (Huffman Coding)**
 
-Problem Statement
+### *Problem Statement*
 
-Develop a file compression system using Huffman Coding, which is a lossless data compression algorithm. The goal is to compress a given text by assigning variable-length binary codes to characters based on their frequencies. Characters with higher frequency should get shorter codes, while less frequent characters get longer codes.
+Develop a file compression system using **Huffman Coding**, which is a lossless data compression algorithm. The goal is to compress a given text by assigning variable-length binary codes to characters based on their frequencies. Characters with higher frequency should get shorter codes, while less frequent characters get longer codes.
 
 The system should support the following functionalities:
 
@@ -12,21 +12,21 @@ The system should support the following functionalities:
 - Encode the input text using the generated codes
 - Decode the encoded binary string back to the original text
 
-Input Format
+### *Input Format*
 
 The input consists of a string representing the text to be compressed.
 
-Example Input:
+**Example Input:**
 
 huffman coding
 
-Output Format
+### *Output Format*
 
 - Display Huffman codes for each character
 - Display the encoded binary string
 - Display the decoded original string
 
-Example Output:
+**Example Output:**
 
 Huffman Codes:
 h : 110
@@ -42,7 +42,8 @@ Encoded String:
 Decoded String:
 huffman coding
 
-Concepts Used
+
+### *Concepts Used*
 
 - Greedy Algorithm
 - Binary Trees
@@ -50,10 +51,11 @@ Concepts Used
 - Hash Maps
 - Recursion
 
-Constraints
+### *Constraints*
 
 1 ≤ Length of input string ≤ 100000  
 Input consists of standard ASCII characters  
 Compression must be lossless
 
 Provide a screenshot of the accepted solution on Leetcode (if applicable), including the left pane in the description of pull request and push the solution.
+
