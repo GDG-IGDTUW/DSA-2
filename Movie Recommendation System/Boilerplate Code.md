@@ -1,5 +1,5 @@
 ## Python
-
+```
 class MovieRecommendationSystem:
     def __init__(self):
         self.users = {}
@@ -20,11 +20,11 @@ class MovieRecommendationSystem:
 
     def view_user_history(self, user_id):
         pass
-
+```
 -----
 
 ## C++
-
+```
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -52,11 +52,11 @@ public:
         return {};
     }
 };
-
+```
 ----
 
 ## JAVA
-
+```
 import java.util.*;
 
 class MovieRecommendationSystem {
@@ -85,3 +85,4 @@ class MovieRecommendationSystem {
         return new ArrayList<>();
     }
 }
+```
