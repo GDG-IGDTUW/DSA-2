@@ -119,14 +119,7 @@ getAllContacts
 - Phone number and email are valid strings
 - All operations should be handled efficiently
 
----
 
-##  Design Notes
-
-- Supports **fast lookup and updates**
-- Uses **hash-based data structures** for optimal performance
-- Achieves **O(1)** time complexity per operation
-- Handles edge cases gracefully
 
 ---
 
