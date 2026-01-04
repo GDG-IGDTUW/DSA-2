@@ -1,5 +1,5 @@
 ## JAVA
-
+```
 java
 import java.util.*;
 
@@ -73,6 +73,7 @@ class HospitalManagementSystem {
 }
 
 ## Python
+...
 class HospitalManagementSystem:
     
     patients: [patient_id, priority, disease_id, total_days]
@@ -121,9 +122,9 @@ class HospitalManagementSystem:
     # Track patients who could not be admitted
     def get_unserved_patients(self):
         return self.unserved_patients
-
+...
 ## C++
-
+```
 #include <iostream>
 #include <vector>
 #include <unordered_map>
@@ -195,7 +196,7 @@ public:
 int main() {
     return 0;
 }
-
+```
 
 
 
