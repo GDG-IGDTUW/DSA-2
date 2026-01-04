@@ -1,6 +1,6 @@
-# 📇 Contact Management System
+#  Contact Management System
 
-## 📌 Problem Statement
+## Problem Statement
 
 Design and implement a data structure for a **Contact Management System** that supports adding contacts, removing contacts, updating contact details, and retrieving stored contacts efficiently.
 
@@ -14,7 +14,7 @@ The system should efficiently handle multiple operations and always maintain acc
 
 ---
 
-## ⚙️ Operations
+##  Operations
 
 Implement the following functions:
 
@@ -44,7 +44,7 @@ Implement the following functions:
 
 ---
 
-## 📥 Input Format
+##  Input Format
 
 - The first line contains an integer `Q`, the number of operations.
 - The next `Q` lines contain one of the following commands:
@@ -57,17 +57,16 @@ getAllContacts
 
 ---
 
-## 📤 Output Format
+##  Output Format
 
 - For every `getContact` operation, output the contact details or `[]`.
 - For every `getAllContacts` operation, output the list of all contacts.
 
 ---
 
-## 🧪 Examples
+##  Examples
 
 ### Example 1
-
 #### INPUT
 7
 addContact 101 Alice 9876543210 alice@gmail.com
@@ -113,7 +112,7 @@ getAllContacts
 
 ---
 
-## 📏 Constraints
+## Constraints
 
 - `1 ≤ Q ≤ 10^5`
 - `1 ≤ contactId ≤ 10^9`
@@ -122,7 +121,7 @@ getAllContacts
 
 ---
 
-## 🧠 Design Notes
+##  Design Notes
 
 - Supports **fast lookup and updates**
 - Uses **hash-based data structures** for optimal performance
@@ -131,7 +130,7 @@ getAllContacts
 
 ---
 
-## 🚀 Key Takeaways
+##  Key Takeaways
 
 - Demonstrates effective **data modeling**
 - Tests understanding of **hash maps**
