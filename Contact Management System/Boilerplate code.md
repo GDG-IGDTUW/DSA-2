@@ -1,7 +1,4 @@
 
-##  C++ Implementation
-
-
 ## C++
 ```cpp
 #include <bits/stdc++.h>
