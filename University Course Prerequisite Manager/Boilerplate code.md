@@ -49,7 +49,7 @@ public:
         return res;
     }
 };
-
+```
 ## JAVA
 
 ```java
@@ -96,7 +96,7 @@ class CourseManager {
         return res;
     }
 }
-
+```
 ## Python
 ```python
 
@@ -126,5 +126,4 @@ class CourseManager:
 
     def getAllCourses(self):
         return sorted(self.prereq_map.keys())
-
-
+```
