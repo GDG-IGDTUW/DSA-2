@@ -1,267 +1,228 @@
-## Java
+## JAVA
 ```java
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ParkingLotSystem {
 
-    /* ===================== ENUMS ===================== */
+    /* =====================================================
+       ENUMS
+       Purpose: Define fixed system-wide constants
+       ===================================================== */
 
     enum VehicleType {
         BIKE, CAR, TRUCK, ELECTRIC
+        // Represents different categories of vehicles
     }
 
     enum ParkingSpotType {
         COMPACT, REGULAR, LARGE, ELECTRIC_CHARGING
+        // Represents different parking spot configurations
     }
 
-    /* ===================== MODELS ===================== */
+    /* =====================================================
+       MODELS (DATA HOLDERS)
+       Purpose: Store system state and attributes
+       ===================================================== */
 
     static class Vehicle {
-        private final String licenseNumber;
-        private final VehicleType type;
+        // Stores vehicle identification and type
+        String licenseNumber;
+        VehicleType type;
 
         Vehicle(String licenseNumber, VehicleType type) {
-            this.licenseNumber = licenseNumber;
-            this.type = type;
+            // Initialize vehicle details
         }
 
         VehicleType getType() {
-            return type;
+            // Return vehicle type
+            return null;
         }
     }
 
     static class ParkingSpot {
-        private final String spotId;
-        private final ParkingSpotType type;
-        private boolean occupied;
+        // Represents a single parking space
+        String spotId;
+        ParkingSpotType type;
+        boolean occupied;
 
         ParkingSpot(String spotId, ParkingSpotType type) {
-            this.spotId = spotId;
-            this.type = type;
-            this.occupied = false;
+            // Initialize parking spot
         }
 
         boolean isAvailable() {
-            return !occupied;
+            // Check if spot is free
+            return false;
         }
 
         void occupy() {
-            occupied = true;
+            // Mark spot as occupied
         }
 
         void release() {
-            occupied = false;
-        }
-
-        ParkingSpotType getType() {
-            return type;
-        }
-
-        String getSpotId() {
-            return spotId;
+            // Mark spot as available
         }
     }
 
     static class ParkingFloor {
-        private final int floorNumber;
-        private final List<ParkingSpot> spots = new ArrayList<>();
+        // Represents one floor in the parking lot
+        int floorNumber;
 
         ParkingFloor(int floorNumber) {
-            this.floorNumber = floorNumber;
+            // Initialize floor number
         }
 
         void addSpot(ParkingSpot spot) {
-            spots.add(spot);
+            // Add a parking spot to this floor
         }
 
-        Optional<ParkingSpot> getAvailableSpot(ParkingSpotType type) {
-            return spots.stream()
-                    .filter(s -> s.getType() == type && s.isAvailable())
-                    .findFirst();
-        }
-
-        int getFloorNumber() {
-            return floorNumber;
+        ParkingSpot getAvailableSpot(ParkingSpotType type) {
+            // Find an available spot of required type
+            return null;
         }
     }
 
     static class Ticket {
-        private final String ticketId;
-        private final ParkingSpot spot;
-        private final LocalDateTime entryTime;
-        private LocalDateTime exitTime;
+        // Represents a parking ticket issued at entry
+        String ticketId;
+        ParkingSpot spot;
+        Object entryTime;
+        Object exitTime;
 
         Ticket(String ticketId, ParkingSpot spot) {
-            this.ticketId = ticketId;
-            this.spot = spot;
-            this.entryTime = LocalDateTime.now();
+            // Initialize ticket at entry time
         }
 
-        void close() {
-            this.exitTime = LocalDateTime.now();
-        }
-
-        LocalDateTime getEntryTime() {
-            return entryTime;
-        }
-
-        LocalDateTime getExitTime() {
-            return exitTime;
-        }
-
-        ParkingSpot getSpot() {
-            return spot;
-        }
-
-        String getTicketId() {
-            return ticketId;
+        void closeTicket() {
+            // Set exit time when vehicle exits
         }
     }
 
-    /* ===================== SERVICES ===================== */
+    /* =====================================================
+       SERVICES (BUSINESS LOGIC)
+       Purpose: Perform system operations
+       ===================================================== */
 
     static class FeeCalculator {
+        // Responsible for parking fee calculation
 
-        static double calculate(LocalDateTime entry, LocalDateTime exit) {
-            long minutes = Duration.between(entry, exit).toMinutes();
-            long hours = (minutes + 59) / 60; // round up
-
-            if (hours <= 1) return 50;
-            return 50 + (hours - 1) * 30;
+        static double calculateFee(Object entryTime, Object exitTime) {
+            // Calculate parking fee based on duration
+            return 0;
         }
     }
 
     static class PaymentService {
-        void pay(double amount) {
-            System.out.println("Payment successful: ₹" + amount);
+        // Handles payment processing
+
+        void processPayment(double amount) {
+            // Integrate with payment gateway
         }
     }
 
     static class ParkingLot {
-        private final List<ParkingFloor> floors = new ArrayList<>();
-        private final Map<String, Ticket> activeTickets = new ConcurrentHashMap<>();
+        // Central controller of the system
+        // Manages floors, tickets, and availability
 
-        void addFloor(ParkingFloor floor) {
-            floors.add(floor);
+        ParkingLot() {
+            // Initialize parking lot
         }
 
-        Ticket park(Vehicle vehicle) {
-            ParkingSpotType requiredSpot = mapVehicleToSpot(vehicle.getType());
+        void addFloor(ParkingFloor floor) {
+            // Register a parking floor
+        }
 
-            for (ParkingFloor floor : floors) {
-                Optional<ParkingSpot> spotOpt = floor.getAvailableSpot(requiredSpot);
-                if (spotOpt.isPresent()) {
-                    ParkingSpot spot = spotOpt.get();
-                    spot.occupy();
-
-                    Ticket ticket = new Ticket(UUID.randomUUID().toString(), spot);
-                    activeTickets.put(ticket.getTicketId(), ticket);
-
-                    return ticket;
-                }
-            }
+        Ticket parkVehicle(Vehicle vehicle) {
+            // Assign a suitable parking spot
+            // Generate and return ticket
             return null;
         }
 
         Ticket getTicket(String ticketId) {
-            return activeTickets.get(ticketId);
+            // Retrieve active ticket
+            return null;
         }
 
         void removeTicket(String ticketId) {
-            activeTickets.remove(ticketId);
-        }
-
-        private ParkingSpotType mapVehicleToSpot(VehicleType type) {
-            switch (type) {
-                case BIKE:
-                    return ParkingSpotType.COMPACT;
-                case CAR:
-                    return ParkingSpotType.REGULAR;
-                case TRUCK:
-                    return ParkingSpotType.LARGE;
-                case ELECTRIC:
-                    return ParkingSpotType.ELECTRIC_CHARGING;
-                default:
-                    throw new IllegalArgumentException();
-            }
+            // Remove ticket after vehicle exits
         }
     }
 
     static class EntryPanel {
-        private final ParkingLot parkingLot;
+        // Handles vehicle entry workflow
 
         EntryPanel(ParkingLot parkingLot) {
-            this.parkingLot = parkingLot;
+            // Associate with parking lot
         }
 
-        Ticket enter(Vehicle vehicle) {
-            return parkingLot.park(vehicle);
+        Ticket enterVehicle(Vehicle vehicle) {
+            // Trigger vehicle parking process
+            return null;
         }
     }
 
     static class ExitPanel {
-        private final ParkingLot parkingLot;
-        private final PaymentService paymentService = new PaymentService();
+        // Handles vehicle exit workflow
 
         ExitPanel(ParkingLot parkingLot) {
-            this.parkingLot = parkingLot;
+            // Associate with parking lot
         }
 
-        void exit(String ticketId) {
-            Ticket ticket = parkingLot.getTicket(ticketId);
-            if (ticket == null) {
-                System.out.println("Invalid or lost ticket");
-                return;
-            }
-
-            ticket.close();
-            double fee = FeeCalculator.calculate(
-                    ticket.getEntryTime(),
-                    ticket.getExitTime()
-            );
-
-            paymentService.pay(fee);
-            ticket.getSpot().release();
-            parkingLot.removeTicket(ticketId);
-
-            System.out.println("Spot released: " + ticket.getSpot().getSpotId());
+        void exitVehicle(String ticketId) {
+            // Calculate fee
+            // Process payment
+            // Release parking spot
         }
     }
 
-    /* ===================== MAIN ===================== */
+    /* =====================================================
+       MAIN (SYSTEM DRIVER)
+       Purpose: Demonstrates system wiring
+       ===================================================== */
 
     public static void main(String[] args) {
-
+    
+        // 1. Initialize parking lot
         ParkingLot parkingLot = new ParkingLot();
-
+    
+        // 2. Create parking floors
         ParkingFloor floor1 = new ParkingFloor(1);
-        floor1.addSpot(new ParkingSpot("C1", ParkingSpotType.COMPACT));
-        floor1.addSpot(new ParkingSpot("R1", ParkingSpotType.REGULAR));
-        floor1.addSpot(new ParkingSpot("E1", ParkingSpotType.ELECTRIC_CHARGING));
-
+        ParkingFloor floor2 = new ParkingFloor(2);
+    
+        // 3. Add parking spots to floors
+        floor1.addSpot(new ParkingSpot("F1-C1", ParkingSpotType.COMPACT));
+        floor1.addSpot(new ParkingSpot("F1-R1", ParkingSpotType.REGULAR));
+        floor1.addSpot(new ParkingSpot("F1-E1", ParkingSpotType.ELECTRIC_CHARGING));
+    
+        floor2.addSpot(new ParkingSpot("F2-R1", ParkingSpotType.REGULAR));
+        floor2.addSpot(new ParkingSpot("F2-L1", ParkingSpotType.LARGE));
+    
+        // 4. Register floors with parking lot
         parkingLot.addFloor(floor1);
-
+        parkingLot.addFloor(floor2);
+    
+        // 5. Initialize entry and exit panels
         EntryPanel entryPanel = new EntryPanel(parkingLot);
         ExitPanel exitPanel = new ExitPanel(parkingLot);
-
-        Vehicle car = new Vehicle("DL-01-AB-1234", VehicleType.CAR);
-
-        Ticket ticket = entryPanel.enter(car);
-
+    
+        // 6. Create vehicle
+        Vehicle vehicle = new Vehicle("DL-01-AB-1234", VehicleType.CAR);
+    
+        // 7. Vehicle entry flow
+        Ticket ticket = entryPanel.enterVehicle(vehicle);
+    
         if (ticket == null) {
-            System.out.println("Parking Full");
+            System.out.println("Parking Lot Full");
             return;
         }
-
-        System.out.println("Ticket Issued");
-        System.out.println("Ticket ID: " + ticket.getTicketId());
-        System.out.println("Assigned Spot: " + ticket.getSpot().getSpotId());
-
-        // simulate exit
-        exitPanel.exit(ticket.getTicketId());
+    
+        System.out.println("Vehicle entered parking lot");
+        System.out.println("Ticket ID: " + ticket.ticketId);
+        System.out.println("Assigned Spot: " + ticket.spot.spotId);
+    
+        // 8. Vehicle exit flow
+        exitPanel.exitVehicle(ticket.ticketId);
+    
+        System.out.println("Vehicle exited parking lot");
     }
+
 }
 ```
